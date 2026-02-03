@@ -55,7 +55,6 @@ Labroll-Utility/
 │           └── LabrollUtility.spec
 ├── version.plist
 ├── freeze.sh
-├── build_dmg.sh
 └── README.md
 ```
 
@@ -71,7 +70,7 @@ python labrollUtility/src/main/python/main.py
 
 ## 📦 Build the macOS Application
 
-### 1. Build the `.app`
+### Build the `.app`
 
 ```bash
 ./src/main/freeze.sh
@@ -81,14 +80,6 @@ The build process **exclusively uses** the following spec file:
 
 ```
 src/main/LabrollUtility.spec
-```
-
----
-
-### 2. Create the Installer DMG
-
-```bash
-./build_dmg.sh
 ```
 
 Result:
