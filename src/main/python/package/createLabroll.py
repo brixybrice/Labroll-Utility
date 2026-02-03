@@ -11,8 +11,18 @@ from hachoir.metadata import extractMetadata
 
 def creation_date(filename):
     parser = createParser(filename)
-    metadata = extractMetadata(parser)
-    return metadata.get('creation_date')
+    if not parser:
+        return datetime.datetime.max
+    try:
+        metadata = extractMetadata(parser)
+        if metadata and metadata.has('creation_date'):
+            return metadata.get('creation_date').value
+    except Exception:
+        pass
+    finally:
+        parser.close()
+
+    return datetime.datetime.max
 
 
 def get_date():

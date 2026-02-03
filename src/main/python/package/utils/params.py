@@ -1,12 +1,19 @@
+import sys
+from pathlib import Path
+
+def resource_path(relative_path):
+    if hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS) / relative_path
+    return Path(__file__).resolve().parent / relative_path
+
 from PySide6 import QtWidgets, QtCore
-from PySide6 import QtGui
 import os
 import json
 import requests
 from discordwebhook import Discord
 
 def get_params_path():
-    return os.path.join(os.path.expanduser("~"), "Library", "Application Support", "Be4Post", "labrollUtility_params.json")
+    return os.path.join(os.path.expanduser("~"), "Library", "Application Support", "LabrollUtility", "labrollUtility_params.json")
 
 def ensure_params_file():
     app_support_path = os.path.dirname(get_params_path())
@@ -49,18 +56,23 @@ def save_params(new_data):
         json.dump(data, f, indent=4)
 
 
-def show(ctx):
-
-    dialog = QtWidgets.QDialog()
+def show(parent=None):
+    dialog = QtWidgets.QDialog(None)
+    try:
+        css_file = resource_path("assets/style.css")
+        with open(css_file, 'r') as f:
+            dialog.setStyleSheet(f.read())
+    except Exception:
+        pass
     dialog.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
     dialog.setAttribute(QtCore.Qt.WA_TranslucentBackground)
     dialog.setWindowTitle("Preferences")
     dialog.setModal(True)
     dialog.resize(int(1920 / 5), dialog.sizeHint().height())
 
-    # Appliquer le style global à la fenêtre
+    #Appliquer le style global à la fenêtre
     try:
-        css_file = ctx.get_resource("style.css")
+        css_file = resource_path("assets/style.css")
         with open(css_file, 'r') as f:
             dialog.setStyleSheet(f.read())
     except Exception:
@@ -129,29 +141,7 @@ def show(ctx):
         json_checkbox.setEnabled(not is_renaming)
         #log_checkbox.setEnabled(not is_renaming)
 
-        if hasattr(ctx, "window"):
-            if hasattr(ctx.window, "destination_input"):
-                ctx.window.destination_input.setEnabled(not is_renaming)
-            if hasattr(ctx.window, "browse_button"):
-                ctx.window.browse_button.setEnabled(not is_renaming)
-
         save_params({"rename_only": is_renaming})
-
-        # Inform MainWindow to adjust file weight display
-        if hasattr(ctx, "window") and hasattr(ctx.window, "drop_list"):
-            for i in range(ctx.window.drop_list.count()):
-                item = ctx.window.drop_list.item(i)
-                custom_widget = ctx.window.drop_list.itemWidget(item)
-                if custom_widget:
-                    layout = custom_widget.layout()
-                    if layout and layout.count() >= 2:
-                        size_label = layout.itemAt(1).widget()
-                        if isinstance(size_label, QtWidgets.QLabel):
-                            base_style = "padding-left: 5px; background-color: transparent;"
-                            if is_renaming:
-                                size_label.setStyleSheet(f"color: rgba(0, 0, 0, 0); {base_style}")
-                            else:
-                                size_label.setStyleSheet(f"color: #888888; {base_style}")
 
     rename_checkbox.stateChanged.connect(toggle_export_options)
     layout.addWidget(rename_checkbox)
@@ -266,3 +256,5 @@ def show(ctx):
     dialog.mouseMoveEvent = mouseMoveEvent
 
     dialog.exec()
+
+__all__ = ["resource_path", "get_params_path", "load_params", "save_params", "show"]
