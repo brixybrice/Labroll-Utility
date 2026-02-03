@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Activer l'environnement virtuel
-source ~/PycharmProjects/pyside2/venv3/bin/activate
+source ~/PycharmProjects/pyside2/Labroll-Utility/venv/bin/activate
 
 # Aller dans le dossier du projet
-cd ~/PycharmProjects/pyside2/labrollUtility
+cd ~/PycharmProjects/pyside2/Labroll-Utility
 
 # Nettoyer les builds précédents
 fbs clean
