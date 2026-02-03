@@ -6,6 +6,9 @@ The application is developed in **Python 3.10 / PySide6** and distributed as a n
 
 ---
 
+![screen capture](/README/labrollUtility2.0.jpeg)
+---
+
 ## ✨ Key Features
 
 - Structured video file renaming
@@ -116,6 +119,23 @@ This version is:
 - automatically reused for the DMG filename
 
 ---
+
+## 🔁 Reverse JSON
+
+Labroll Utility supports a **Reverse JSON** workflow.
+
+This feature allows the application to:
+- read a previously generated JSON file
+- reconstruct the original clip order and naming logic
+- reapply or verify renaming decisions
+
+This is especially useful for:
+- auditing a past operation
+- rebuilding a labroll after partial data loss
+- validating consistency between source media and delivered files
+
+The Reverse JSON mechanism is designed as a safety and traceability layer, ensuring that every renaming operation can be understood and reproduced after the fact.
+
 
 ## 🎨 macOS Icon (Liquid Glass)
 
