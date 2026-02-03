@@ -1,48 +1,73 @@
 #!/bin/bash
-
 set -e
 
-# Go to project root (the folder that contains venv/ and src/)
+# Aller à la racine du projet
 cd "$(dirname "$0")/../.."
+ROOT_DIR="$(pwd)"
+VERSION_PLIST="${ROOT_DIR}/version.plist"
+echo VERSION_PLIST
 
-# Clean previous builds
-rm -rf build dist LabrollUtility.spec __pycache__
+# Nettoyage
+rm -rf build dist *.spec __pycache__
 
-# Activate venv
+# Activer le venv
 source venv/bin/activate
 
-# Sanity checks: ensure we are using the venv's python and that PySide6 is importable
+# Sanity checks
 python -c "import sys; print('PYTHON:', sys.executable)"
-python -c "import PySide6; print('PySide6 OK:', PySide6.__file__)"
-python -c "import PyInstaller; print('PyInstaller OK:', PyInstaller.__version__)"
+python -c "import PySide6; print('PySide6 OK')"
+python -c "import PyInstaller; print('PyInstaller OK')"
 
-# Build with PyInstaller using the venv interpreter (critical on macOS)
-python -m PyInstaller \
-  --noconfirm \
-  --clean \
-  --windowed \
-  --name LabrollUtility \
-  --icon assets/icon.icns \
-  --collect-all PySide6 \
-  --add-data "src/main/python/package/utils/assets:assets" \
-  --add-data "src/main/python/package:package" \
-  src/main/python/main.py
+# Build PyInstaller
+pyinstaller src/main/LabrollUtility.spec --clean
 
-# Verify output (.app on macOS)
-APP_PATH="dist/LabrollUtility.app"
-if [ -d "$APP_PATH" ]; then
-  echo "Build OK: $APP_PATH"
-  open dist
-  exit 0
+APP_NAME="LabrollUtility"
+
+# Lire automatiquement la version depuis version.plist (CFBundleShortVersionString)
+
+if [ ! -f "$VERSION_PLIST" ]; then
+  echo "ERROR: version.plist not found at $VERSION_PLIST"
+  exit 1
 fi
 
-# Fallback: onedir output (folder with executable)
-ONEDIR_PATH="dist/LabrollUtility"
-if [ -d "$ONEDIR_PATH" ]; then
-  echo "Build OK (onedir): $ONEDIR_PATH"
-  open dist
-  exit 0
+VERSION=$(python - <<PY
+import plistlib
+from pathlib import Path
+
+p = Path("${VERSION_PLIST}")
+with p.open("rb") as f:
+    data = plistlib.load(f)
+
+print(data.get("CFBundleShortVersionString", "0.0.0"))
+PY
+)
+
+echo "[FREEZE] Version from version.plist = ${VERSION}"
+
+APP_PATH="dist/${APP_NAME}.app"
+DMG_NAME="dist/${APP_NAME}-${VERSION}.dmg"
+
+if [ ! -d "$APP_PATH" ]; then
+  echo "ERROR: App not found at $APP_PATH"
+  exit 1
 fi
 
-echo "ERROR: Build output not found in dist/."
-exit 1
+# Nettoyage ancien DMG
+rm -f "$DMG_NAME"
+
+# Création du DMG
+create-dmg \
+  --volname "${APP_NAME}" \
+  --window-pos 200 120 \
+  --window-size 600 400 \
+  --icon-size 120 \
+  --icon "${APP_NAME}.app" 150 200 \
+  --app-drop-link 450 200 \
+  "$DMG_NAME" \
+  "dist"
+
+echo "Build OK:"
+echo " - App : $APP_PATH"
+echo " - DMG : $DMG_NAME"
+
+open dist
