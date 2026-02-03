@@ -6,7 +6,7 @@ The application is developed in **Python 3.10 / PySide6** and distributed as a n
 
 ---
 
-![screen capture](/README/labrollUtility2.0.jpeg)
+![screen capture](/README/labrollUtility2.0.png)
 ---
 
 ## ✨ Key Features
